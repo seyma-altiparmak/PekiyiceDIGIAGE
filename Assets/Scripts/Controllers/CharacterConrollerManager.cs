@@ -12,7 +12,7 @@ public class CharacterControllerManager : MonoBehaviour
     private bool facingRight = true;
 
     public float speed = 5f;
-    public float jumpForce = 5f;
+    public float jumpForce = 15f;
     private bool isGrounded;
 
     private void Awake()

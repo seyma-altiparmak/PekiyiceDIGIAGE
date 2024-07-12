@@ -1,18 +1,24 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class CharacterControllerManager : MonoBehaviour
 {
+    public GameObject ruinArea;
     [HideInInspector] public GameObject character;
+    [SerializeField] private AudioSource ruinVoice;
     private PlayerActions playerInputActions;
     private Rigidbody2D rb2D;
     private Vector2 moveInput;
     private bool facingRight = true;
+    private bool isCharRuin = false;
+    private Sprite charSprite;
+    [SerializeField] private Sprite charRuinSprite;
 
     public float speed = 5f;
-    public float jumpForce = 15f;
+    public float jumpForce = 0.1f;
     private bool isGrounded;
 
     private void Awake()
@@ -26,6 +32,7 @@ public class CharacterControllerManager : MonoBehaviour
         playerInputActions.PlayerInputs.Movement.performed += OnMove;
         playerInputActions.PlayerInputs.Movement.canceled += OnMove;
         playerInputActions.PlayerInputs.Jump.performed += OnJump;
+        playerInputActions.PlayerInputs.Ruin.performed += OnRuin;
     }
 
     private void OnDisable()
@@ -33,6 +40,7 @@ public class CharacterControllerManager : MonoBehaviour
         playerInputActions.PlayerInputs.Movement.performed -= OnMove;
         playerInputActions.PlayerInputs.Movement.canceled -= OnMove;
         playerInputActions.PlayerInputs.Jump.performed -= OnJump;
+        playerInputActions.PlayerInputs.Ruin.performed -= OnRuin;
         playerInputActions.PlayerInputs.Disable();
     }
 
@@ -42,6 +50,7 @@ public class CharacterControllerManager : MonoBehaviour
         if (character != null)
         {
             rb2D = character.GetComponent<Rigidbody2D>();
+            charSprite = character.GetComponent<SpriteRenderer>().sprite;
         }
         findcharacter(character);
     }
@@ -61,6 +70,15 @@ public class CharacterControllerManager : MonoBehaviour
         if (isGrounded)
         {
             rb2D.AddForce(new Vector2(0, jumpForce), ForceMode2D.Impulse);
+        }
+    }
+
+    private void OnRuin(InputAction.CallbackContext context)
+    {
+        if (isGrounded)
+        {
+            Instantiate(ruinArea, new Vector3(transform.position.x, transform.position.y - 0.5f, 0), Quaternion.identity);
+            StartCoroutine(HandleRuin());
         }
     }
 
@@ -89,6 +107,56 @@ public class CharacterControllerManager : MonoBehaviour
         Vector3 scale = character.transform.localScale;
         scale.x *= -1;
         character.transform.localScale = scale;
+    }
+
+    private IEnumerator HandleRuin()
+    {
+        if (ruinVoice != null)
+        {
+            ruinVoice.Play();
+            var spriteRenderer = character.GetComponent<SpriteRenderer>();
+            if (spriteRenderer != null)
+            {
+                spriteRenderer.sprite = charRuinSprite;
+                isCharRuin = true;
+                // Disable character controller and make collider a trigger
+                this.enabled = false;
+                var boxCollider = character.GetComponent<BoxCollider2D>();
+                if (boxCollider != null)
+                {
+                    boxCollider.isTrigger = true;
+                }
+                // Disable gravity
+                rb2D.gravityScale = 0;
+            }
+            yield return new WaitUntil(() => !ruinVoice.isPlaying);
+            GetAllComponentsAfterRuin();
+        }
+    }
+
+    private void GetAllComponentsAfterRuin()
+    {
+        if (isCharRuin)
+        {
+            var spriteRenderer = character.GetComponent<SpriteRenderer>();
+            if (spriteRenderer != null)
+            {
+                spriteRenderer.sprite = charSprite;
+            }
+            var characterController = character.GetComponent<CharacterControllerManager>();
+            if (characterController != null)
+            {
+                characterController.enabled = true;
+            }
+            var boxCollider = character.GetComponent<BoxCollider2D>();
+            if (boxCollider != null)
+            {
+                boxCollider.isTrigger = false;
+            }
+            // Re-enable gravity
+            rb2D.gravityScale = 1;
+            isCharRuin = false;
+        }
     }
 
     private void OnCollisionEnter2D(Collision2D collision)

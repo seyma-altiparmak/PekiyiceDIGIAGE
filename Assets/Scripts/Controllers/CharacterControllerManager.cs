@@ -86,6 +86,7 @@ public class CharacterControllerManager : MonoBehaviour
             uiControllerManager.isItRuin = false;
             uiControllerManager.totalTimer = 20f;
             rockManager.RandomRockIndex();
+            uiControllerManager.rockIndexCounter.text = rockManager.totalRockIndex.ToString();
         }
     }
 
@@ -96,7 +97,6 @@ public class CharacterControllerManager : MonoBehaviour
             Vector2 move = new Vector2(moveInput.x * speed, rb2D.velocity.y);
             rb2D.velocity = move;
 
-            // Flip character based on movement direction
             if (moveInput.x > 0 && !facingRight)
             {
                 Flip();
@@ -126,15 +126,13 @@ public class CharacterControllerManager : MonoBehaviour
             {
                 spriteRenderer.sprite = charRuinSprite;
                 isCharRuin = true;
-                // Disable character controller and make collider a trigger
                 this.enabled = false;
-                rb2D.velocity = Vector2.zero; // Stop the character's movement
+                rb2D.velocity = Vector2.zero; 
                 var boxCollider = character.GetComponent<BoxCollider2D>();
                 if (boxCollider != null)
                 {
                     boxCollider.isTrigger = true;
                 }
-                // Disable gravity
                 rb2D.gravityScale = 0;
             }
             yield return new WaitUntil(() => !ruinVoice.isPlaying);

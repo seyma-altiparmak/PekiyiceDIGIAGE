@@ -7,9 +7,9 @@ public class UIControllerManager : MonoBehaviour
 {
     private TextMeshProUGUI ruinTimeCounter;
     [HideInInspector] public TextMeshProUGUI rockIndexCounter;
-    [SerializeField] private float updateInterval = 0.1f; // Interval for updating the timer display
-    [SerializeField] private float countdownStep = 0.1f; // Amount of time to decrement each step
-    [HideInInspector] public float totalTimer = 20f; // Start the countdown from 20 seconds
+    [SerializeField] private float updateInterval = 0.1f;
+    [SerializeField] private float countdownStep = 0.1f;
+    [HideInInspector] public float totalTimer = 20f;
     [HideInInspector] public bool isItRuin = false;
 
     private void Start()

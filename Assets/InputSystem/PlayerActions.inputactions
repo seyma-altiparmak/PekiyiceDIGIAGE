@@ -145,6 +145,34 @@
                     "isPartOfComposite": true
                 }
             ]
+        },
+        {
+            "name": "ThrowRock",
+            "id": "6fed4d88-c5dd-4217-948e-eb4887c71fd2",
+            "actions": [
+                {
+                    "name": "Throw",
+                    "type": "Button",
+                    "id": "03e91ac1-3564-4fb2-a2ac-36b2d3c239d6",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "0c5379e1-fa05-4ef1-91f8-b1440a5a93a3",
+                    "path": "<Keyboard>/n",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Throw",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
         }
     ],
     "controlSchemes": []

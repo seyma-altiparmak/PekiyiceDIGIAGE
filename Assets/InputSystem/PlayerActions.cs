@@ -167,6 +167,34 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
                     ""isPartOfComposite"": true
                 }
             ]
+        },
+        {
+            ""name"": ""ThrowRock"",
+            ""id"": ""6fed4d88-c5dd-4217-948e-eb4887c71fd2"",
+            ""actions"": [
+                {
+                    ""name"": ""Throw"",
+                    ""type"": ""Button"",
+                    ""id"": ""03e91ac1-3564-4fb2-a2ac-36b2d3c239d6"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""0c5379e1-fa05-4ef1-91f8-b1440a5a93a3"",
+                    ""path"": ""<Keyboard>/n"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Throw"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
         }
     ],
     ""controlSchemes"": []
@@ -176,6 +204,9 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
         m_PlayerInputs_Movement = m_PlayerInputs.FindAction("Movement", throwIfNotFound: true);
         m_PlayerInputs_Jump = m_PlayerInputs.FindAction("Jump", throwIfNotFound: true);
         m_PlayerInputs_Ruin = m_PlayerInputs.FindAction("Ruin", throwIfNotFound: true);
+        // ThrowRock
+        m_ThrowRock = asset.FindActionMap("ThrowRock", throwIfNotFound: true);
+        m_ThrowRock_Throw = m_ThrowRock.FindAction("Throw", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -295,10 +326,60 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
         }
     }
     public PlayerInputsActions @PlayerInputs => new PlayerInputsActions(this);
+
+    // ThrowRock
+    private readonly InputActionMap m_ThrowRock;
+    private List<IThrowRockActions> m_ThrowRockActionsCallbackInterfaces = new List<IThrowRockActions>();
+    private readonly InputAction m_ThrowRock_Throw;
+    public struct ThrowRockActions
+    {
+        private @PlayerActions m_Wrapper;
+        public ThrowRockActions(@PlayerActions wrapper) { m_Wrapper = wrapper; }
+        public InputAction @Throw => m_Wrapper.m_ThrowRock_Throw;
+        public InputActionMap Get() { return m_Wrapper.m_ThrowRock; }
+        public void Enable() { Get().Enable(); }
+        public void Disable() { Get().Disable(); }
+        public bool enabled => Get().enabled;
+        public static implicit operator InputActionMap(ThrowRockActions set) { return set.Get(); }
+        public void AddCallbacks(IThrowRockActions instance)
+        {
+            if (instance == null || m_Wrapper.m_ThrowRockActionsCallbackInterfaces.Contains(instance)) return;
+            m_Wrapper.m_ThrowRockActionsCallbackInterfaces.Add(instance);
+            @Throw.started += instance.OnThrow;
+            @Throw.performed += instance.OnThrow;
+            @Throw.canceled += instance.OnThrow;
+        }
+
+        private void UnregisterCallbacks(IThrowRockActions instance)
+        {
+            @Throw.started -= instance.OnThrow;
+            @Throw.performed -= instance.OnThrow;
+            @Throw.canceled -= instance.OnThrow;
+        }
+
+        public void RemoveCallbacks(IThrowRockActions instance)
+        {
+            if (m_Wrapper.m_ThrowRockActionsCallbackInterfaces.Remove(instance))
+                UnregisterCallbacks(instance);
+        }
+
+        public void SetCallbacks(IThrowRockActions instance)
+        {
+            foreach (var item in m_Wrapper.m_ThrowRockActionsCallbackInterfaces)
+                UnregisterCallbacks(item);
+            m_Wrapper.m_ThrowRockActionsCallbackInterfaces.Clear();
+            AddCallbacks(instance);
+        }
+    }
+    public ThrowRockActions @ThrowRock => new ThrowRockActions(this);
     public interface IPlayerInputsActions
     {
         void OnMovement(InputAction.CallbackContext context);
         void OnJump(InputAction.CallbackContext context);
         void OnRuin(InputAction.CallbackContext context);
+    }
+    public interface IThrowRockActions
+    {
+        void OnThrow(InputAction.CallbackContext context);
     }
 }

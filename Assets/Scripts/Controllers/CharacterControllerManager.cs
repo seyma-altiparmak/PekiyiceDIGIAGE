@@ -10,6 +10,8 @@ public class CharacterControllerManager : MonoBehaviour
     [HideInInspector] public GameObject character;
     [SerializeField] private AudioSource ruinVoice;
     private PlayerActions playerInputActions;
+    private UIControllerManager uiControllerManager;
+    private RockManager rockManager;
     private Rigidbody2D rb2D;
     private Vector2 moveInput;
     private bool facingRight = true;
@@ -24,6 +26,7 @@ public class CharacterControllerManager : MonoBehaviour
     private void Awake()
     {
         playerInputActions = new PlayerActions();
+        rockManager = GameObject.Find("Managers").GetComponent<RockManager>();
     }
 
     private void OnEnable()
@@ -46,6 +49,7 @@ public class CharacterControllerManager : MonoBehaviour
 
     private void Start()
     {
+        uiControllerManager = GameObject.Find("Managers").GetComponent<UIControllerManager>();
         character = GameObject.FindGameObjectWithTag("Player");
         if (character != null)
         {
@@ -75,10 +79,13 @@ public class CharacterControllerManager : MonoBehaviour
 
     private void OnRuin(InputAction.CallbackContext context)
     {
-        if (isGrounded)
+        if (isGrounded && uiControllerManager.isItRuin)
         {
             Instantiate(ruinArea, new Vector3(transform.position.x, transform.position.y - 0.5f, 0), Quaternion.identity);
             StartCoroutine(HandleRuin());
+            uiControllerManager.isItRuin = false;
+            uiControllerManager.totalTimer = 20f;
+            rockManager.RandomRockIndex();
         }
     }
 
@@ -121,6 +128,7 @@ public class CharacterControllerManager : MonoBehaviour
                 isCharRuin = true;
                 // Disable character controller and make collider a trigger
                 this.enabled = false;
+                rb2D.velocity = Vector2.zero; // Stop the character's movement
                 var boxCollider = character.GetComponent<BoxCollider2D>();
                 if (boxCollider != null)
                 {

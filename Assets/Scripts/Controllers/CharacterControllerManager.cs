@@ -12,12 +12,15 @@ public class CharacterControllerManager : MonoBehaviour
     private PlayerActions playerInputActions;
     private UIControllerManager uiControllerManager;
     private RockManager rockManager;
+    private Animator charAnimator;
     private Rigidbody2D rb2D;
     private Vector2 moveInput;
     private bool facingRight = true;
     private bool isCharRuin = false;
-    private Sprite charSprite;
+    private SpriteRenderer spriteRenderer;
+    private BoxCollider2D boxCollider;
     [SerializeField] private Sprite charRuinSprite;
+    private Sprite charSprite;
 
     public float speed = 5f;
     public float jumpForce = 0.1f;
@@ -54,14 +57,18 @@ public class CharacterControllerManager : MonoBehaviour
         if (character != null)
         {
             rb2D = character.GetComponent<Rigidbody2D>();
-            charSprite = character.GetComponent<SpriteRenderer>().sprite;
+            charAnimator = character.GetComponent<Animator>();
+            spriteRenderer = character.GetComponent<SpriteRenderer>();
+            boxCollider = character.GetComponent<BoxCollider2D>();
+            charSprite = spriteRenderer.sprite;
         }
         findcharacter(character);
     }
 
     private void Update()
     {
-        Move();
+        Move(); 
+        UpdateAnimationStates();
     }
 
     private void OnMove(InputAction.CallbackContext context)
@@ -96,12 +103,9 @@ public class CharacterControllerManager : MonoBehaviour
         {
             Vector2 move = new Vector2(moveInput.x * speed, rb2D.velocity.y);
             rb2D.velocity = move;
+            charAnimator.SetBool("isWalking", moveInput.x != 0);
 
-            if (moveInput.x > 0 && !facingRight)
-            {
-                Flip();
-            }
-            else if (moveInput.x < 0 && facingRight)
+            if (moveInput.x > 0 && !facingRight || moveInput.x < 0 && facingRight)
             {
                 Flip();
             }
@@ -121,20 +125,13 @@ public class CharacterControllerManager : MonoBehaviour
         if (ruinVoice != null)
         {
             ruinVoice.Play();
-            var spriteRenderer = character.GetComponent<SpriteRenderer>();
-            if (spriteRenderer != null)
-            {
-                spriteRenderer.sprite = charRuinSprite;
-                isCharRuin = true;
-                this.enabled = false;
-                rb2D.velocity = Vector2.zero; 
-                var boxCollider = character.GetComponent<BoxCollider2D>();
-                if (boxCollider != null)
-                {
-                    boxCollider.isTrigger = true;
-                }
-                rb2D.gravityScale = 0;
-            }
+            spriteRenderer.sprite = charRuinSprite;
+            isCharRuin = true;
+            this.enabled = false;
+            rb2D.velocity = Vector2.zero;
+            boxCollider.isTrigger = true;
+            rb2D.gravityScale = 0;
+
             yield return new WaitUntil(() => !ruinVoice.isPlaying);
             GetAllComponentsAfterRuin();
         }
@@ -144,22 +141,9 @@ public class CharacterControllerManager : MonoBehaviour
     {
         if (isCharRuin)
         {
-            var spriteRenderer = character.GetComponent<SpriteRenderer>();
-            if (spriteRenderer != null)
-            {
-                spriteRenderer.sprite = charSprite;
-            }
-            var characterController = character.GetComponent<CharacterControllerManager>();
-            if (characterController != null)
-            {
-                characterController.enabled = true;
-            }
-            var boxCollider = character.GetComponent<BoxCollider2D>();
-            if (boxCollider != null)
-            {
-                boxCollider.isTrigger = false;
-            }
-            // Re-enable gravity
+            spriteRenderer.sprite = charSprite;
+            this.enabled = true;
+            boxCollider.isTrigger = false;
             rb2D.gravityScale = 1;
             isCharRuin = false;
         }
@@ -180,13 +164,26 @@ public class CharacterControllerManager : MonoBehaviour
             isGrounded = false;
         }
     }
+    private void UpdateAnimationStates()
+    {
+        // This ensures that animation state changes are checked every frame
+        if (Mathf.Abs(moveInput.x) > 0.01f) // Adjust threshold as needed
+        {
+            if (!charAnimator.GetBool("isWalking"))
+                charAnimator.SetBool("isWalking", true);
+        }
+        else
+        {
+            if (charAnimator.GetBool("isWalking"))
+                charAnimator.SetBool("isWalking", false);
+        }
+    }
 
-    // Test Codes:
     private void findcharacter(GameObject character)
     {
         if (character == null)
-            print("character not found");
+            Debug.Log("Character not found");
         else
-            print("success");
+            Debug.Log("Character successfully found");
     }
 }

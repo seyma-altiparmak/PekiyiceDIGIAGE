@@ -53,6 +53,15 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Shake"",
+                    ""type"": ""Button"",
+                    ""id"": ""2aded36a-95bd-4197-ab96-4701a80c4913"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -165,6 +174,28 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
                     ""action"": ""Ruin"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""ShakeVector"",
+                    ""id"": ""a7932ce4-b0ac-4265-9b26-d0f7636e3fb5"",
+                    ""path"": ""2DVector"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Shake"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""down"",
+                    ""id"": ""f51b02e9-c7f9-441d-b8b4-b652487dbde3"",
+                    ""path"": ""<Keyboard>/enter"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Shake"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
                 }
             ]
         },
@@ -204,6 +235,7 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
         m_PlayerInputs_Movement = m_PlayerInputs.FindAction("Movement", throwIfNotFound: true);
         m_PlayerInputs_Jump = m_PlayerInputs.FindAction("Jump", throwIfNotFound: true);
         m_PlayerInputs_Ruin = m_PlayerInputs.FindAction("Ruin", throwIfNotFound: true);
+        m_PlayerInputs_Shake = m_PlayerInputs.FindAction("Shake", throwIfNotFound: true);
         // ThrowRock
         m_ThrowRock = asset.FindActionMap("ThrowRock", throwIfNotFound: true);
         m_ThrowRock_Throw = m_ThrowRock.FindAction("Throw", throwIfNotFound: true);
@@ -271,6 +303,7 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
     private readonly InputAction m_PlayerInputs_Movement;
     private readonly InputAction m_PlayerInputs_Jump;
     private readonly InputAction m_PlayerInputs_Ruin;
+    private readonly InputAction m_PlayerInputs_Shake;
     public struct PlayerInputsActions
     {
         private @PlayerActions m_Wrapper;
@@ -278,6 +311,7 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
         public InputAction @Movement => m_Wrapper.m_PlayerInputs_Movement;
         public InputAction @Jump => m_Wrapper.m_PlayerInputs_Jump;
         public InputAction @Ruin => m_Wrapper.m_PlayerInputs_Ruin;
+        public InputAction @Shake => m_Wrapper.m_PlayerInputs_Shake;
         public InputActionMap Get() { return m_Wrapper.m_PlayerInputs; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -296,6 +330,9 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
             @Ruin.started += instance.OnRuin;
             @Ruin.performed += instance.OnRuin;
             @Ruin.canceled += instance.OnRuin;
+            @Shake.started += instance.OnShake;
+            @Shake.performed += instance.OnShake;
+            @Shake.canceled += instance.OnShake;
         }
 
         private void UnregisterCallbacks(IPlayerInputsActions instance)
@@ -309,6 +346,9 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
             @Ruin.started -= instance.OnRuin;
             @Ruin.performed -= instance.OnRuin;
             @Ruin.canceled -= instance.OnRuin;
+            @Shake.started -= instance.OnShake;
+            @Shake.performed -= instance.OnShake;
+            @Shake.canceled -= instance.OnShake;
         }
 
         public void RemoveCallbacks(IPlayerInputsActions instance)
@@ -377,6 +417,7 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
         void OnMovement(InputAction.CallbackContext context);
         void OnJump(InputAction.CallbackContext context);
         void OnRuin(InputAction.CallbackContext context);
+        void OnShake(InputAction.CallbackContext context);
     }
     public interface IThrowRockActions
     {

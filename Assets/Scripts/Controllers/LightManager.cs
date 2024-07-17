@@ -17,7 +17,7 @@ public class LightManager : MonoBehaviour
             }
             else
             {
-                animatorController.SetTrigger("TouchLight");
+                //animatorController.SetTrigger("TouchLight");
             }
         }
     }
@@ -26,7 +26,7 @@ public class LightManager : MonoBehaviour
     {
         if(collision.TryGetComponent(out IAMLight light))
         {
-            animatorController.SetTrigger("CatchLight");
+            //animatorController.SetTrigger("CatchLight");
         }
     }
 }

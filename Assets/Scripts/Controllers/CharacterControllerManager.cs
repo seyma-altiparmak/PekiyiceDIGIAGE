@@ -6,6 +6,7 @@ using UnityEngine.InputSystem;
 
 public class CharacterControllerManager : MonoBehaviour
 {
+
     public GameObject ruinArea;
     [HideInInspector] public GameObject character;
     [SerializeField] private AudioSource ruinVoice;
@@ -30,6 +31,7 @@ public class CharacterControllerManager : MonoBehaviour
     {
         playerInputActions = new PlayerActions();
         rockManager = GameObject.Find("Managers").GetComponent<RockManager>();
+
     }
 
     private void OnEnable()
@@ -62,6 +64,7 @@ public class CharacterControllerManager : MonoBehaviour
             boxCollider = character.GetComponent<BoxCollider2D>();
             charSprite = spriteRenderer.sprite;
         }
+        charAnimator.SetBool("isAnimAttack", true);
         findcharacter(character);
     }
 
